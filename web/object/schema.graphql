@@ -1,0 +1,121 @@
+# source: http://127.0.0.1:1234/graphql
+# timestamp: Wed Feb 20 2019 09:50:30 GMT+0800 (China Standard Time)
+
+"""作者信息集合"""
+type Author {
+  """名称"""
+  name: String
+
+  """附属机构"""
+  org: String
+
+  """发表的 Paper"""
+  papers: [AuthorsPaper]!
+}
+
+"""作者发表的文章id"""
+type AuthorsPaper {
+  """Paper Id"""
+  id: String
+}
+
+"""Paper 信息集合"""
+type Paper {
+  """摘要"""
+  abstract: String
+
+  """作者"""
+  authors: [Author]!
+
+  """文档类型"""
+  doc_type: String
+
+  """Digital Object Identifier"""
+  doi: String
+
+  """研究领域"""
+  fos: [String]
+
+  """Paper Id"""
+  id: String
+
+  """ISBN"""
+  isbn: String
+
+  """ISSN"""
+  issn: String
+
+  """期号"""
+  issue: String
+
+  """关键词"""
+  keywords: [String]
+
+  """语言"""
+  lang: String
+
+  """被引数量"""
+  n_citation: Int
+
+  """结束页"""
+  page_end: String
+
+  """开始页"""
+  paper_start: String
+
+  """PDF地址"""
+  pdf: String
+
+  """出版商"""
+  publisher: String
+
+  """引用资源"""
+  references: [String]
+
+  """标题"""
+  title: String
+
+  """URL"""
+  url: [String]
+
+  """发表地址"""
+  venue: String
+
+  """容量"""
+  volume: String
+
+  """发表年份"""
+  year: Int
+}
+
+type Query {
+  """获取指定的 Authors 列表"""
+  authors(
+    """待搜索的 Authors 名称"""
+    name: String
+
+    """从何处开始查询"""
+    offset: Int = 0
+
+    """查询数目"""
+    first: Int = 10
+  ): [Author]
+
+  """获取指定的 Paper 信息"""
+  paper(
+    """要获取的 Paper id"""
+    id: String!
+  ): Paper
+
+  """获取指定的 Paper 列表"""
+  papers(
+    """待搜索的 Paper 题目"""
+    title: String
+
+    """从何处开始查询"""
+    offset: Int = 0
+
+    """查询数目"""
+    first: Int = 10
+  ): [Paper]
+}
