@@ -1,7 +1,10 @@
 package object
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/arianxx/aminer/internal"
 	"strconv"
 
 	"github.com/graphql-go/graphql"
@@ -24,7 +27,7 @@ var queryPapers = &graphql.Field{
 	}),
 	Args: graphql.FieldConfigArgument{
 		"title": &graphql.ArgumentConfig{
-			Type:        graphql.String,
+			Type:        graphql.NewNonNull(graphql.String),
 			Description: "待搜索的 Paper 题目",
 		},
 		"offset": &graphql.ArgumentConfig{
@@ -37,6 +40,10 @@ var queryPapers = &graphql.Field{
 			DefaultValue: 10,
 			Description:  "查询数目",
 		},
+		"lang": &graphql.ArgumentConfig{
+			Type:        langEnumType,
+			Description: "过滤语言",
+		},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		vars := map[string]string{
@@ -44,12 +51,46 @@ var queryPapers = &graphql.Field{
 			"$first":  strconv.Itoa(p.Args["first"].(int)),
 			"$offset": strconv.Itoa(p.Args["offset"].(int)),
 		}
-		resJson, err := Db.QueryWithVars(model.QueryPaperList, vars)
+
+		q := model.QueryPaperList.GetQuery()
+		if lang, ok := p.Args["lang"]; ok {
+			q.SetFilters([]string{
+				fmt.Sprintf("eq(lang, %s)", lang.(string)),
+			})
+		}
+
+		query, err := q.Text(model.ListTemplate)
 		if err != nil {
 			return nil, err
 		}
-		var res model.PaperList
-		json.Unmarshal(resJson, &res)
+
+		ctx := context.Background()
+		resJson, err := Db.QueryWithVars(ctx, query, vars)
+		if err != nil {
+			return nil, err
+		}
+		var res internal.PaperList
+		err = json.Unmarshal(resJson, &res)
+		if err != nil {
+			return nil, err
+		}
+
+		q.Name = "lang"
+		q.Other = internal.LangMap
+		query, err = q.Text(model.CountTemplate)
+		if err != nil {
+			return nil, err
+		}
+
+		resJson, err = Db.QueryWithVars(ctx, query, vars)
+		if err != nil {
+			return nil, err
+		}
+		err = json.Unmarshal(resJson, &res.Info[0].Lang)
+		if err != nil {
+			return nil, err
+		}
+
 		return res, nil
 	},
 }
@@ -67,12 +108,16 @@ var queryPaper = &graphql.Field{
 		vars := map[string]string{
 			"$id": p.Args["id"].(string),
 		}
-		resJson, err := Db.QueryWithVars(model.QueryPaper, vars)
+		ctx := context.Background()
+		resJson, err := Db.QueryWithVars(ctx, model.QueryPaper, vars)
 		if err != nil {
 			return nil, err
 		}
-		var res model.PaperList
-		json.Unmarshal(resJson, &res)
+		var res internal.PaperList
+		err = json.Unmarshal(resJson, &res)
+		if err != nil {
+			return nil, err
+		}
 		if len(res.Data) > 0 {
 			return res.Data[0], nil
 		} else {

@@ -1,5 +1,5 @@
 # source: http://172.20.3.246:1234/graphql
-# timestamp: Sat Feb 23 2019 15:57:02 GMT+0800 (China Standard Time)
+# timestamp: Sat Feb 23 2019 21:56:02 GMT+0800 (China Standard Time)
 
 """作者信息集合"""
 type Author {
@@ -22,6 +22,33 @@ type AuthorsInfo {
 type AuthorsPaper {
   """Paper Id"""
   id: String
+}
+
+enum Lang {
+  INDIAN
+  JAPANESE
+  ENGLISH
+  KOREAN
+  FRENCH
+  GERMAN
+  GREEK
+  CHINESE
+}
+
+"""语言统计类型。每个列表只有一个值，及使用该语言的 paper 数量。"""
+type LangCountType {
+  deu: [LangInfo]!
+  ell: [LangInfo]!
+  en: [LangInfo]!
+  fra: [LangInfo]!
+  jp: [LangInfo]!
+  jq: [LangInfo]!
+  ko: [LangInfo]!
+  zh: [LangInfo]!
+}
+
+type LangInfo {
+  num: Int!
 }
 
 """Paper 信息集合"""
@@ -101,14 +128,14 @@ type PapersInfo {
 type Query {
   """获取指定的 Authors 列表"""
   authors(
+    """查询数目"""
+    first: Int = 10
+
     """待搜索的 Authors 名称"""
-    name: String
+    name: String!
 
     """从何处开始查询"""
     offset: Int = 0
-
-    """查询数目"""
-    first: Int = 10
   ): AuthorsInfo
 
   """获取指定的 Paper 信息"""
@@ -119,19 +146,25 @@ type Query {
 
   """获取指定的 Paper 列表"""
   papers(
-    """查询数目"""
-    first: Int = 10
-
     """待搜索的 Paper 题目"""
-    title: String
+    title: String!
 
     """从何处开始查询"""
     offset: Int = 0
+
+    """查询数目"""
+    first: Int = 10
+
+    """过滤语言"""
+    lang: Lang
   ): PapersInfo
 }
 
 """此次 query 相关信息"""
 type QueryInfoType {
+  """各语言数量。只有查 paper 才有此字段。"""
+  lang: LangCountType
+
   """结果总数"""
   num: Int
 }

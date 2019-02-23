@@ -1,5 +1,35 @@
 package internal
 
+type langInfo struct {
+	Num int `json:"num"`
+}
+
+type langCount struct {
+	En  []langInfo `json:"en"`
+	Ell []langInfo `json:"ell"`
+	Zh  []langInfo `json:"zh"`
+	Ko  []langInfo `json:"ko"`
+	Fra []langInfo `json:"fra"`
+	Deu []langInfo `json:"deu"`
+	Jq  []langInfo `json:"jq"`
+	Jp  []langInfo `json:"jp"`
+}
+
+type info struct {
+	Num  int       `json:"num"`
+	Lang langCount `json:"lang"`
+}
+
+type PaperList struct {
+	Data []Paper `json:"data"`
+	Info []info  `json:"info"`
+}
+
+type AuthorList struct {
+	Data []Author `json:"data"`
+	Info []info   `json:"info"`
+}
+
 type AuthorsPaper struct {
 	Id string `json:"id"`
 }

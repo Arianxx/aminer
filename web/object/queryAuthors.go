@@ -1,7 +1,9 @@
 package object
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/arianxx/aminer/internal"
 	"strconv"
 
 	"github.com/graphql-go/graphql"
@@ -24,7 +26,7 @@ var queryAuthors = &graphql.Field{
 	}),
 	Args: graphql.FieldConfigArgument{
 		"name": &graphql.ArgumentConfig{
-			Type:        graphql.String,
+			Type:        graphql.NewNonNull(graphql.String),
 			Description: "待搜索的 Authors 名称",
 		},
 		"offset": &graphql.ArgumentConfig{
@@ -44,12 +46,21 @@ var queryAuthors = &graphql.Field{
 			"$first":  strconv.Itoa(p.Args["first"].(int)),
 			"$offset": strconv.Itoa(p.Args["offset"].(int)),
 		}
-		resJson, err := Db.QueryWithVars(model.QueryAuthorsList, vars)
+		query, err := model.QueryAuthorsList.Text(model.ListTemplate)
 		if err != nil {
 			return nil, err
 		}
-		var res model.AuthorList
-		json.Unmarshal(resJson, &res)
+
+		ctx := context.Background()
+		resJson, err := Db.QueryWithVars(ctx, query, vars)
+		if err != nil {
+			return nil, err
+		}
+		var res internal.AuthorList
+		err = json.Unmarshal(resJson, &res)
+		if err != nil {
+			return nil, err
+		}
 		return res, nil
 	},
 }

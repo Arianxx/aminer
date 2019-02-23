@@ -1,6 +1,45 @@
 package object
 
-import "github.com/graphql-go/graphql"
+import (
+	"github.com/arianxx/aminer/internal"
+	"github.com/graphql-go/graphql"
+)
+
+var langEnumType = graphql.NewEnum(graphql.EnumConfig{
+	Name: "Lang",
+	Values: func() graphql.EnumValueConfigMap {
+		res := make(graphql.EnumValueConfigMap)
+		for k, v := range internal.LangMap {
+			res[k] = &graphql.EnumValueConfig{
+				Value: v,
+			}
+		}
+		return res
+	}(),
+})
+
+var langInfoType = graphql.NewObject(graphql.ObjectConfig{
+	Name: "LangInfo",
+	Fields: graphql.Fields{
+		"num": &graphql.Field{
+			Type: graphql.NewNonNull(graphql.Int),
+		},
+	},
+})
+
+var langCountType = graphql.NewObject(graphql.ObjectConfig{
+	Name:        "LangCountType",
+	Description: "语言统计类型。每个列表只有一个值，及使用该语言的 paper 数量。",
+	Fields: func() graphql.Fields {
+		res := make(graphql.Fields)
+		for _, v := range internal.LangMap {
+			res[v] = &graphql.Field{
+				Type: graphql.NewNonNull(graphql.NewList(langInfoType)),
+			}
+		}
+		return res
+	}(),
+})
 
 var queryInfoType = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "QueryInfoType",
@@ -9,6 +48,10 @@ var queryInfoType = graphql.NewObject(graphql.ObjectConfig{
 		"num": &graphql.Field{
 			Description: "结果总数",
 			Type:        graphql.Int,
+		},
+		"lang": &graphql.Field{
+			Description: "各语言数量。只有查 paper 才有此字段。",
+			Type:        langCountType,
 		},
 	},
 })
