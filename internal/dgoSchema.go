@@ -26,7 +26,7 @@ var schema = `
 	name: string @index(term) .
 	org: string @index(term) .	
 	venue: string @index(exact) .
-	keyword: [string] @index(term) .
+	keywords: [string] @index(term) .
 	fos: [string] @index(term) .
 	references: [string] @index(exact) .
 	doc_type: string @index(term) .

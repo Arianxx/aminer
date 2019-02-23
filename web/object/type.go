@@ -2,6 +2,17 @@ package object
 
 import "github.com/graphql-go/graphql"
 
+var queryInfoType = graphql.NewObject(graphql.ObjectConfig{
+	Name:        "QueryInfoType",
+	Description: "此次 query 相关信息",
+	Fields: graphql.Fields{
+		"num": &graphql.Field{
+			Description: "结果总数",
+			Type:        graphql.Int,
+		},
+	},
+})
+
 var authorsPaperType = graphql.NewObject(graphql.ObjectConfig{
 	Name:        "AuthorsPaper",
 	Description: "作者发表的文章id",

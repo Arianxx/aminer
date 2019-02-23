@@ -11,7 +11,17 @@ import (
 
 var queryAuthors = &graphql.Field{
 	Description: "获取指定的 Authors 列表",
-	Type:        graphql.NewList(authorType),
+	Type: graphql.NewObject(graphql.ObjectConfig{
+		Name: "AuthorsInfo",
+		Fields: graphql.Fields{
+			"data": &graphql.Field{
+				Type: graphql.NewList(authorType),
+			},
+			"info": &graphql.Field{
+				Type: graphql.NewNonNull(graphql.NewList(queryInfoType)),
+			},
+		},
+	}),
 	Args: graphql.FieldConfigArgument{
 		"name": &graphql.ArgumentConfig{
 			Type:        graphql.String,
@@ -40,6 +50,6 @@ var queryAuthors = &graphql.Field{
 		}
 		var res model.AuthorList
 		json.Unmarshal(resJson, &res)
-		return res.Data, nil
+		return res, nil
 	},
 }

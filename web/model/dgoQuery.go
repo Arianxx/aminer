@@ -2,12 +2,18 @@ package model
 
 import "github.com/arianxx/aminer/internal"
 
+type info struct {
+	Num int `json:"num"`
+}
+
 type PaperList struct {
 	Data []internal.Paper `json:"data"`
+	Info []info           `json:"info"`
 }
 
 type AuthorList struct {
 	Data []internal.Author `json:"data"`
+	Info []info            `json:"info"`
 }
 
 var QueryPaperList = `
@@ -20,6 +26,9 @@ query Paper($title: string, $offset: int, $first: int){
 			id
 		}
     }
+  }
+  info(func: alloftext(title, $title)){
+	num: count(uid)
   }
 }
 `
@@ -67,6 +76,9 @@ query Authors($name: string, $offset: int, $first: int){
 	papers: ~authors {
 		id
 	}
+  }
+  info(func: allofterms(name, $name)){
+	num: count(uid)
   }
 }
 `

@@ -11,7 +11,17 @@ import (
 
 var queryPapers = &graphql.Field{
 	Description: "获取指定的 Paper 列表",
-	Type:        graphql.NewList(paperType),
+	Type: graphql.NewObject(graphql.ObjectConfig{
+		Name: "PapersInfo",
+		Fields: graphql.Fields{
+			"data": &graphql.Field{
+				Type: graphql.NewList(paperType),
+			},
+			"info": &graphql.Field{
+				Type: graphql.NewNonNull(graphql.NewList(queryInfoType)),
+			},
+		},
+	}),
 	Args: graphql.FieldConfigArgument{
 		"title": &graphql.ArgumentConfig{
 			Type:        graphql.String,
@@ -40,7 +50,7 @@ var queryPapers = &graphql.Field{
 		}
 		var res model.PaperList
 		json.Unmarshal(resJson, &res)
-		return res.Data, nil
+		return res, nil
 	},
 }
 

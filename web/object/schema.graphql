@@ -1,5 +1,5 @@
-# source: http://127.0.0.1:1234/graphql
-# timestamp: Wed Feb 20 2019 09:50:30 GMT+0800 (China Standard Time)
+# source: http://172.20.3.246:1234/graphql
+# timestamp: Sat Feb 23 2019 15:57:02 GMT+0800 (China Standard Time)
 
 """作者信息集合"""
 type Author {
@@ -11,6 +11,11 @@ type Author {
 
   """发表的 Paper"""
   papers: [AuthorsPaper]!
+}
+
+type AuthorsInfo {
+  data: [Author]
+  info: [QueryInfoType]!
 }
 
 """作者发表的文章id"""
@@ -88,6 +93,11 @@ type Paper {
   year: Int
 }
 
+type PapersInfo {
+  data: [Paper]
+  info: [QueryInfoType]!
+}
+
 type Query {
   """获取指定的 Authors 列表"""
   authors(
@@ -99,7 +109,7 @@ type Query {
 
     """查询数目"""
     first: Int = 10
-  ): [Author]
+  ): AuthorsInfo
 
   """获取指定的 Paper 信息"""
   paper(
@@ -109,13 +119,19 @@ type Query {
 
   """获取指定的 Paper 列表"""
   papers(
+    """查询数目"""
+    first: Int = 10
+
     """待搜索的 Paper 题目"""
     title: String
 
     """从何处开始查询"""
     offset: Int = 0
+  ): PapersInfo
+}
 
-    """查询数目"""
-    first: Int = 10
-  ): [Paper]
+"""此次 query 相关信息"""
+type QueryInfoType {
+  """结果总数"""
+  num: Int
 }
