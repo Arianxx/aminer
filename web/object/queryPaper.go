@@ -19,9 +19,14 @@ type condtionInput struct {
 func setConditions(m map[string]interface{}, q *model.ListQuery) {
 	for k, c := range searchConditionsInput {
 		if v, ok := m[k]; ok {
-			q.SetFilters(
-				fmt.Sprintf(c.Form, v.(string)),
-			)
+			var f string
+			switch s := v.(type) {
+			case int:
+				f = fmt.Sprintf(c.Form, s)
+			case string:
+				f = fmt.Sprintf(c.Form, s)
+			}
+			q.SetFilters(f)
 		}
 	}
 }
@@ -61,6 +66,20 @@ var searchConditionsInput = map[string]condtionInput{
 			Type:        graphql.String,
 		},
 		Form: "eq(publisher, \"%s\")",
+	},
+	"nCitationGe": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description: "Paper 引用数量，返回大于等于此数的 paper",
+			Type:        graphql.Int,
+		},
+		Form: "ge(n_citation, %d)",
+	},
+	"nCitationLe": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description: "Paper 引用数量，返回小于等于此数的 paper",
+			Type:        graphql.Int,
+		},
+		Form: "le(n_citation, %d)",
 	},
 }
 

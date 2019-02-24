@@ -1,5 +1,5 @@
 # source: http://172.20.3.246:1234/graphql
-# timestamp: Sun Feb 24 2019 11:40:42 GMT+0800 (China Standard Time)
+# timestamp: Sun Feb 24 2019 12:08:04 GMT+0800 (China Standard Time)
 
 """作者信息集合"""
 type Author {
@@ -25,14 +25,14 @@ type AuthorsPaper {
 }
 
 enum Lang {
-  GERMAN
   ENGLISH
-  KOREAN
   FRENCH
-  INDIAN
+  GERMAN
   JAPANESE
   GREEK
   CHINESE
+  KOREAN
+  INDIAN
 }
 
 """语言统计类型。每个列表只有一个值，及使用该语言的 paper 数量。"""
@@ -168,8 +168,11 @@ type QueryInfoType {
 
 """搜索条件"""
 input SearchCondtion {
-  """Paper 出版机构"""
-  publisher: String
+  """Paper 引用数量，返回大于等于此数的 paper"""
+  nCitationGe: Int
+
+  """Paper 引用数量，返回小于等于此数的 paper"""
+  nCitationLe: Int
 
   """Paper 题目"""
   title: String = ""
@@ -182,4 +185,7 @@ input SearchCondtion {
 
   """Paper fos"""
   fos: String
+
+  """Paper 出版机构"""
+  publisher: String
 }

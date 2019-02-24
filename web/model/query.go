@@ -7,13 +7,34 @@ var QueryPaperList = ListQuery{
 	},
 	Function: "alloftext(title, $title)",
 	Want: `
-		expand(_all_){
-		name
-		org
-		papers: ~authors {
-			id
-			}
-    	}
+	id
+    title
+    authors{
+      name
+      org
+      papers: ~authors{
+      id
+    }
+    }
+  	venue
+  	year
+  	keywords
+  	fos
+  	n_citation
+  	references
+  	page_start
+  	page_end
+  	doc_type
+  	lang
+  	publisher
+  	volume
+  	issue
+  	issn
+  	isbn
+  	doi
+  	pdf
+  	url
+  	abstract
 	`,
 }
 
