@@ -10,3 +10,4 @@ var LangMap = map[string]string{
 	"INDIAN":   "jq",
 	"JAPANESE": "jp",
 }
+

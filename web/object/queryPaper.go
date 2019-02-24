@@ -2,7 +2,6 @@ package object
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/arianxx/aminer/internal"
 	"strconv"
@@ -11,6 +10,71 @@ import (
 
 	"github.com/arianxx/aminer/web/model"
 )
+
+type condtionInput struct {
+	Field *graphql.InputObjectFieldConfig
+	Form  string
+}
+
+func setConditions(m map[string]interface{}, q *model.ListQuery) {
+	for k, c := range searchConditionsInput {
+		if v, ok := m[k]; ok {
+			q.SetFilters(
+				fmt.Sprintf(c.Form, v.(string)),
+			)
+		}
+	}
+}
+
+var searchConditionsInput = map[string]condtionInput{
+	"title": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description:  "Paper 题目",
+			DefaultValue: "",
+			Type:         graphql.String,
+		},
+	},
+	"lang": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description: "Paper 语言",
+			Type:        langEnumType,
+		},
+		Form: "eq(lang, \"%s\")",
+	},
+	"keywords": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description: "Paper 关键词",
+			Type:        graphql.String,
+		},
+		Form: "anyofterms(keywords, \"%s\")",
+	},
+	"fos": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description: "Paper fos",
+			Type:        graphql.String,
+		},
+		Form: "anyofterms(fos, \"%s\")",
+	},
+	"publisher": {
+		Field: &graphql.InputObjectFieldConfig{
+			Description: "Paper 出版机构",
+			Type:        graphql.String,
+		},
+		Form: "eq(publisher, \"%s\")",
+	},
+}
+
+var searchInput = graphql.NewInputObject(graphql.InputObjectConfig{
+	Name:        "SearchCondtion",
+	Description: "搜索条件",
+	Fields: func() graphql.InputObjectConfigFieldMap {
+		res := make(graphql.InputObjectConfigFieldMap)
+		for k, v := range searchConditionsInput {
+			res[k] = v.Field
+		}
+		return res
+	}(),
+})
 
 var queryPapers = &graphql.Field{
 	Description: "获取指定的 Paper 列表",
@@ -26,9 +90,9 @@ var queryPapers = &graphql.Field{
 		},
 	}),
 	Args: graphql.FieldConfigArgument{
-		"title": &graphql.ArgumentConfig{
-			Type:        graphql.NewNonNull(graphql.String),
-			Description: "待搜索的 Paper 题目",
+		"SearchCondtion": &graphql.ArgumentConfig{
+			Type:        graphql.NewNonNull(searchInput),
+			Description: "搜索条件",
 		},
 		"offset": &graphql.ArgumentConfig{
 			Type:         graphql.Int,
@@ -40,37 +104,26 @@ var queryPapers = &graphql.Field{
 			DefaultValue: 10,
 			Description:  "查询数目",
 		},
-		"lang": &graphql.ArgumentConfig{
-			Type:        langEnumType,
-			Description: "过滤语言",
-		},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+		searchCondition := p.Args["SearchCondtion"].(map[string]interface{})
 		vars := map[string]string{
-			"$title":  p.Args["title"].(string),
+			"$title":  searchCondition["title"].(string),
 			"$first":  strconv.Itoa(p.Args["first"].(int)),
 			"$offset": strconv.Itoa(p.Args["offset"].(int)),
 		}
+		delete(searchCondition, "title")
 
 		q := model.QueryPaperList.GetQuery()
-		if lang, ok := p.Args["lang"]; ok {
-			q.SetFilters([]string{
-				fmt.Sprintf("eq(lang, %s)", lang.(string)),
-			})
-		}
+		setConditions(searchCondition, &q)
 
 		query, err := q.Text(model.ListTemplate)
 		if err != nil {
 			return nil, err
 		}
-
 		ctx := context.Background()
-		resJson, err := Db.QueryWithVars(ctx, query, vars)
-		if err != nil {
-			return nil, err
-		}
 		var res internal.PaperList
-		err = json.Unmarshal(resJson, &res)
+		err = Db.GetDataWithVars(ctx, query, vars, &res)
 		if err != nil {
 			return nil, err
 		}
@@ -81,15 +134,7 @@ var queryPapers = &graphql.Field{
 		if err != nil {
 			return nil, err
 		}
-
-		resJson, err = Db.QueryWithVars(ctx, query, vars)
-		if err != nil {
-			return nil, err
-		}
-		err = json.Unmarshal(resJson, &res.Info[0].Lang)
-		if err != nil {
-			return nil, err
-		}
+		err = Db.GetDataWithVars(ctx, query, vars, &res.Info[0].Lang)
 
 		return res, nil
 	},
@@ -109,15 +154,12 @@ var queryPaper = &graphql.Field{
 			"$id": p.Args["id"].(string),
 		}
 		ctx := context.Background()
-		resJson, err := Db.QueryWithVars(ctx, model.QueryPaper, vars)
-		if err != nil {
-			return nil, err
-		}
 		var res internal.PaperList
-		err = json.Unmarshal(resJson, &res)
+		err := Db.GetDataWithVars(ctx, model.QueryPaper, vars, &res)
 		if err != nil {
 			return nil, err
 		}
+
 		if len(res.Data) > 0 {
 			return res.Data[0], nil
 		} else {

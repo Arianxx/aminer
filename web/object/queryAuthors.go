@@ -2,7 +2,6 @@ package object
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/arianxx/aminer/internal"
 	"strconv"
 
@@ -51,13 +50,9 @@ var queryAuthors = &graphql.Field{
 			return nil, err
 		}
 
-		ctx := context.Background()
-		resJson, err := Db.QueryWithVars(ctx, query, vars)
-		if err != nil {
-			return nil, err
-		}
 		var res internal.AuthorList
-		err = json.Unmarshal(resJson, &res)
+		ctx := context.Background()
+		err = Db.GetDataWithVars(ctx, query, vars, &res)
 		if err != nil {
 			return nil, err
 		}

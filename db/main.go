@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/arianxx/aminer/web/model"
 	"log"
 
 	"github.com/arianxx/aminer/internal"
@@ -14,7 +15,7 @@ func main() {
 		}
 	}()
 
-	paths, err := internal.GetPaperFilePaths()
+	paths, err := model.GetPaperFilePaths()
 	if err != nil {
 		log.Fatal(err)
 	}

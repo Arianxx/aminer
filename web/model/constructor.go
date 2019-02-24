@@ -41,12 +41,12 @@ func (q *ListQuery) SetVariables(m map[string]string) {
 	}
 }
 
-func (q *ListQuery) SetFilters(f []string) {
+func (q *ListQuery) SetFilters(f string) {
 	if !q.copied {
 		return
 	}
 
-	q.Filters = append(q.Filters, f...)
+	q.Filters = append(q.Filters, f)
 }
 
 func (q *ListQuery) Text(t string) (string, error) {

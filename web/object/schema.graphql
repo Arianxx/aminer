@@ -1,5 +1,5 @@
 # source: http://172.20.3.246:1234/graphql
-# timestamp: Sat Feb 23 2019 21:56:02 GMT+0800 (China Standard Time)
+# timestamp: Sun Feb 24 2019 11:40:42 GMT+0800 (China Standard Time)
 
 """作者信息集合"""
 type Author {
@@ -25,12 +25,12 @@ type AuthorsPaper {
 }
 
 enum Lang {
-  INDIAN
-  JAPANESE
+  GERMAN
   ENGLISH
   KOREAN
   FRENCH
-  GERMAN
+  INDIAN
+  JAPANESE
   GREEK
   CHINESE
 }
@@ -128,14 +128,14 @@ type PapersInfo {
 type Query {
   """获取指定的 Authors 列表"""
   authors(
-    """查询数目"""
-    first: Int = 10
-
     """待搜索的 Authors 名称"""
     name: String!
 
     """从何处开始查询"""
     offset: Int = 0
+
+    """查询数目"""
+    first: Int = 10
   ): AuthorsInfo
 
   """获取指定的 Paper 信息"""
@@ -146,17 +146,14 @@ type Query {
 
   """获取指定的 Paper 列表"""
   papers(
-    """待搜索的 Paper 题目"""
-    title: String!
+    """搜索条件"""
+    SearchCondtion: SearchCondtion!
 
     """从何处开始查询"""
     offset: Int = 0
 
     """查询数目"""
     first: Int = 10
-
-    """过滤语言"""
-    lang: Lang
   ): PapersInfo
 }
 
@@ -167,4 +164,22 @@ type QueryInfoType {
 
   """结果总数"""
   num: Int
+}
+
+"""搜索条件"""
+input SearchCondtion {
+  """Paper 出版机构"""
+  publisher: String
+
+  """Paper 题目"""
+  title: String = ""
+
+  """Paper 语言"""
+  lang: Lang
+
+  """Paper 关键词"""
+  keywords: String
+
+  """Paper fos"""
+  fos: String
 }
