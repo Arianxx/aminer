@@ -6,7 +6,14 @@ query {{.Name}}($offset: int, $first: int
 		,{{ $k }}: {{ $v }}
 	{{ end }}
 ){
-	data(func: {{ .Function }}, first: $first, offset: $offset)
+	data(func: {{ .Function }}, first: $first, offset: $offset
+	{{ if .Orderdesc }}
+		,orderdesc: {{ .Orderdesc }}
+	{{ end }}
+	{{ if .Orderasc }}
+		,orderasc: {{ .Orderasc }}
+	{{ end }}
+	)
 	{{ if .Filters }}
 		@filter(
 		{{ range $i, $f := .Filters }}

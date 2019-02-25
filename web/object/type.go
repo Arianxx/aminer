@@ -18,6 +18,20 @@ var langEnumType = graphql.NewEnum(graphql.EnumConfig{
 	}(),
 })
 
+var orderFieldEnumType = graphql.NewEnum(graphql.EnumConfig{
+	Name: "OrderField",
+	Values: graphql.EnumValueConfigMap{
+		"year": &graphql.EnumValueConfig{
+			Value:       "year",
+			Description: "发表年份",
+		},
+		"n_citation": &graphql.EnumValueConfig{
+			Value:       "n_citation",
+			Description: "被引数量",
+		},
+	},
+})
+
 var langInfoType = graphql.NewObject(graphql.ObjectConfig{
 	Name: "LangInfo",
 	Fields: graphql.Fields{

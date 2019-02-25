@@ -22,4 +22,3 @@ func GetDgraphClient(host string) (*dgo.Dgraph, func() error) {
 
 	return dg, conn.Close
 }
-

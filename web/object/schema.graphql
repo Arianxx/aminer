@@ -1,5 +1,5 @@
 # source: http://172.20.3.246:1234/graphql
-# timestamp: Sun Feb 24 2019 12:08:04 GMT+0800 (China Standard Time)
+# timestamp: Mon Feb 25 2019 21:33:36 GMT+0800 (China Standard Time)
 
 """作者信息集合"""
 type Author {
@@ -25,14 +25,14 @@ type AuthorsPaper {
 }
 
 enum Lang {
-  ENGLISH
-  FRENCH
-  GERMAN
-  JAPANESE
   GREEK
+  ENGLISH
   CHINESE
   KOREAN
+  FRENCH
+  GERMAN
   INDIAN
+  JAPANESE
 }
 
 """语言统计类型。每个列表只有一个值，及使用该语言的 paper 数量。"""
@@ -49,6 +49,14 @@ type LangCountType {
 
 type LangInfo {
   num: Int!
+}
+
+enum OrderField {
+  """发表年份"""
+  year
+
+  """被引数量"""
+  n_citation
 }
 
 """Paper 信息集合"""
@@ -154,6 +162,12 @@ type Query {
 
     """查询数目"""
     first: Int = 10
+
+    """按某一字段降序排序"""
+    orderdesc: OrderField
+
+    """按某一字段升序排序"""
+    orderasc: OrderField
   ): PapersInfo
 }
 
@@ -168,18 +182,6 @@ type QueryInfoType {
 
 """搜索条件"""
 input SearchCondtion {
-  """Paper 引用数量，返回大于等于此数的 paper"""
-  nCitationGe: Int
-
-  """Paper 引用数量，返回小于等于此数的 paper"""
-  nCitationLe: Int
-
-  """Paper 题目"""
-  title: String = ""
-
-  """Paper 语言"""
-  lang: Lang
-
   """Paper 关键词"""
   keywords: String
 
@@ -188,4 +190,16 @@ input SearchCondtion {
 
   """Paper 出版机构"""
   publisher: String
+
+  """Paper 引用数量，返回大于等于此数的 paper"""
+  nCitationGe: Int
+
+  """Paper 引用数量，返回小于等于此数的 paper"""
+  nCitationLe: Int
+
+  """Paper 题目"""
+  title: String
+
+  """Paper 语言"""
+  lang: Lang
 }

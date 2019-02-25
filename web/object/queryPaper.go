@@ -2,7 +2,6 @@ package object
 
 import (
 	"context"
-	"fmt"
 	"github.com/arianxx/aminer/internal"
 	"strconv"
 
@@ -11,32 +10,7 @@ import (
 	"github.com/arianxx/aminer/web/model"
 )
 
-type condtionInput struct {
-	Field *graphql.InputObjectFieldConfig
-	Form  string
-}
-
-func setConditions(m map[string]interface{}, q *model.ListQuery) {
-	for k, c := range searchConditionsInput {
-		if v, ok := m[k]; ok {
-			var f string
-			switch v.(type) {
-			case int:
-				f = fmt.Sprintf(c.Form, v.(int))
-			case string:
-				f = fmt.Sprintf(c.Form, v.(string))
-			}
-
-			if len(q.Function) == 0 {
-				q.Function = f
-			} else {
-				q.SetFilters(f)
-			}
-		}
-	}
-}
-
-var searchConditionsInput = map[string]condtionInput{
+var searchConditionsInputMap = map[string]model.CondtionInput{
 	"title": {
 		Field: &graphql.InputObjectFieldConfig{
 			Description: "Paper 题目",
@@ -93,7 +67,7 @@ var searchInput = graphql.NewInputObject(graphql.InputObjectConfig{
 	Description: "搜索条件",
 	Fields: func() graphql.InputObjectConfigFieldMap {
 		res := make(graphql.InputObjectConfigFieldMap)
-		for k, v := range searchConditionsInput {
+		for k, v := range searchConditionsInputMap {
 			res[k] = v.Field
 		}
 		return res
@@ -128,6 +102,16 @@ var queryPapers = &graphql.Field{
 			DefaultValue: 10,
 			Description:  "查询数目",
 		},
+		"orderdesc": &graphql.ArgumentConfig{
+			Type:         orderFieldEnumType,
+			DefaultValue: "",
+			Description:  "按某一字段降序排序",
+		},
+		"orderasc": &graphql.ArgumentConfig{
+			Type:         orderFieldEnumType,
+			DefaultValue: "",
+			Description:  "按某一字段升序排序",
+		},
 	},
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		searchCondition := p.Args["SearchCondtion"].(map[string]interface{})
@@ -137,11 +121,11 @@ var queryPapers = &graphql.Field{
 		}
 
 		q := model.QueryPaperList.GetQuery()
-		if v, ok := searchCondition["title"]; ok {
-			q.Function = fmt.Sprintf(`anyoftext(title, "%s")`, v.(string))
-			delete(searchCondition, "title")
-		}
-		setConditions(searchCondition, &q)
+		q.SetConditions(searchCondition, searchConditionsInputMap)
+		q.SetOrder(
+			p.Args["orderdesc"].(string),
+			p.Args["orderasc"].(string),
+		)
 
 		query, err := q.Text(model.ListTemplate)
 		if err != nil {

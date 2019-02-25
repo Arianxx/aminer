@@ -3,14 +3,22 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"github.com/graphql-go/graphql"
 	"text/template"
 )
+
+type CondtionInput struct {
+	Field *graphql.InputObjectFieldConfig
+	Form  string
+}
 
 type ListQuery struct {
 	Name      string
 	Variables map[string]string
 	Function  string
 	Filters   []string
+	Orderdesc string
+	Orderasc  string
 	Want      string
 	Other     map[string]string
 
@@ -47,6 +55,30 @@ func (q *ListQuery) SetFilters(f string) {
 	}
 
 	q.Filters = append(q.Filters, f)
+}
+
+func (q *ListQuery) SetConditions(m map[string]interface{}, s map[string]CondtionInput) {
+	for k, c := range s {
+		if v, ok := m[k]; ok {
+			var f string
+			switch v.(type) {
+			case int:
+				f = fmt.Sprintf(c.Form, v.(int))
+			case string:
+				f = fmt.Sprintf(c.Form, v.(string))
+			}
+
+			if len(q.Function) == 0 {
+				q.Function = f
+			} else {
+				q.SetFilters(f)
+			}
+		}
+	}
+}
+
+func (q *ListQuery) SetOrder(desc, asc string) {
+	q.Orderdesc, q.Orderasc = desc, asc
 }
 
 func (q *ListQuery) Text(t string) (string, error) {
