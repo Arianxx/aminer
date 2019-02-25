@@ -2,10 +2,6 @@ package model
 
 var QueryPaperList = ListQuery{
 	Name: "Paper",
-	Variables: map[string]string{
-		"$title": "string",
-	},
-	Function: "alloftext(title, $title)",
 	Want: `
 	id
     title

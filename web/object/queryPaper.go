@@ -20,13 +20,18 @@ func setConditions(m map[string]interface{}, q *model.ListQuery) {
 	for k, c := range searchConditionsInput {
 		if v, ok := m[k]; ok {
 			var f string
-			switch s := v.(type) {
+			switch v.(type) {
 			case int:
-				f = fmt.Sprintf(c.Form, s)
+				f = fmt.Sprintf(c.Form, v.(int))
 			case string:
-				f = fmt.Sprintf(c.Form, s)
+				f = fmt.Sprintf(c.Form, v.(string))
 			}
-			q.SetFilters(f)
+
+			if len(q.Function) == 0 {
+				q.Function = f
+			} else {
+				q.SetFilters(f)
+			}
 		}
 	}
 }
@@ -34,10 +39,10 @@ func setConditions(m map[string]interface{}, q *model.ListQuery) {
 var searchConditionsInput = map[string]condtionInput{
 	"title": {
 		Field: &graphql.InputObjectFieldConfig{
-			Description:  "Paper 题目",
-			DefaultValue: "",
-			Type:         graphql.String,
+			Description: "Paper 题目",
+			Type:        graphql.String,
 		},
+		Form: "anyoftext(title, \"%s\")",
 	},
 	"lang": {
 		Field: &graphql.InputObjectFieldConfig{
@@ -127,13 +132,15 @@ var queryPapers = &graphql.Field{
 	Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 		searchCondition := p.Args["SearchCondtion"].(map[string]interface{})
 		vars := map[string]string{
-			"$title":  searchCondition["title"].(string),
 			"$first":  strconv.Itoa(p.Args["first"].(int)),
 			"$offset": strconv.Itoa(p.Args["offset"].(int)),
 		}
-		delete(searchCondition, "title")
 
 		q := model.QueryPaperList.GetQuery()
+		if v, ok := searchCondition["title"]; ok {
+			q.Function = fmt.Sprintf(`anyoftext(title, "%s")`, v.(string))
+			delete(searchCondition, "title")
+		}
 		setConditions(searchCondition, &q)
 
 		query, err := q.Text(model.ListTemplate)
