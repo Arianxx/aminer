@@ -58,6 +58,10 @@ func (q *ListQuery) SetFilters(f string) {
 }
 
 func (q *ListQuery) SetConditions(m map[string]interface{}, s map[string]CondtionInput) {
+	if !q.copied {
+		return
+	}
+
 	for k, c := range s {
 		if v, ok := m[k]; ok {
 			var f string
@@ -78,6 +82,10 @@ func (q *ListQuery) SetConditions(m map[string]interface{}, s map[string]Condtio
 }
 
 func (q *ListQuery) SetOrder(desc, asc string) {
+	if !q.copied {
+		return
+	}
+
 	q.Orderdesc, q.Orderasc = desc, asc
 }
 
